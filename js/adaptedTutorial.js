@@ -1,4 +1,3 @@
-// Add all scripts to the JS folder
 /* Map of GeoJSON data from MegaCities.geojson */
 //declare map var in global scope
 var map;
@@ -38,7 +37,7 @@ function onEachFeature(feature, layer) {
 //function to retrieve the data and place it on the map
 function getData(map){
     //load the data
-    fetch("data/touristnumbers.geojson")
+    fetch("data/MegaCities.geojson")
         .then(function(response){
             return response.json();
         })
@@ -59,4 +58,32 @@ function getData(map){
             }).addTo(map);
         })
 };
+//function to retrieve the data and place it on the map
+/*
+function getData(){
+    //load the data
+    fetch("data/MegaCities.geojson")
+        .then(function(response){
+            return response.json();
+        })
+        .then(function(json){
+        		//create marker options
+        		var geojsonMarkerOptions = {
+        				radius: 8,
+        				fillColor: "#ff7800",
+        				color: "#000",
+        				weight: 1,
+        				opacity: 1,
+        				fillOpacity: 0.8
+        		};
+        		//create a Leaflet GeoJSON layer and add it to the map
+        		L.geoJson(json, {
+        				pointToLayer: function (feature, latlng){
+        						return L.circleMarker(latlng, geojsonMarkerOptions);
+        				}
+        		}).addTo(map);
+        });
+
+};
+*/
 document.addEventListener('DOMContentLoaded',createMap)
