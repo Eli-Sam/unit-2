@@ -48,17 +48,10 @@ function calculateMinValue(data){
 //calculate the radius of each proportional symbol
 function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
-    var minRadius = 5;
+    var minRadius = 20;
     //Flannery Apperance Compensation formula
-    if(attValue){
-      var radius = 0.05 * Math.pow(attValue/minValue,0.5715) * minRadius
+    var radius = 0.01 * Math.pow(attValue/minValue,0.5715) * minRadius
     return radius;
-  }
-  // ATTEMPTING TO CHANGE THE SYMBOLS WHEN RADIUS IS EMPTY
-    else{
-      var radius="None"
-      return radius;
-    }
 };
 
 //Step 2: Import GeoJSON data
@@ -97,6 +90,14 @@ function processData(data){
 
     return attributes;
 };
+function PopupContent(properties, attribute){
+    this.properties = properties;
+    this.attribute = attribute;
+    this.year = attribute.split("_")[1];
+    this.population = this.properties[attribute];
+    this.formatted = "<p><b>Country:</b> " + this.properties["Country Name"] + "</p><p><b>Number of Tourists in  " + this.year + ":</b> " + this.population;
+};
+
 
 //function to convert markers to circle markers
 function pointToLayer(feature, latlng, attributes){
@@ -125,13 +126,11 @@ function pointToLayer(feature, latlng, attributes){
 
     //build popup content string
     //build popup content string starting with city...Example 2.1 line 24
-    var popupContent = "<p><b>Country:</b> " + feature.properties["Country Name"] + "</p>";
-
-  //add formatted attribute to popup content string
-    var year = attribute.split("_")[1];
-    popupContent += "<p><b>Number of Tourists in " + year + ":</b> " + feature.properties[attribute];
+    var popupContent = new PopupContent(feature.properties, attribute);
     //bind the popup to the circle marker
-    layer.bindPopup(popupContent);
+    layer.bindPopup(popupContent.formatted, {
+        offset: new L.Point(0,-options.radius)
+    });
 
     //return the circle marker to the L.geoJson pointToLayer option
     return layer;
@@ -139,30 +138,20 @@ function pointToLayer(feature, latlng, attributes){
 
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
-        if (layer.feature && layer.feature.properties[attribute]){
+        if (layer.feature){
           //access feature properties
           var props = layer.feature.properties;
 
           //update each feature's radius based on new attribute values
           var radius = calcPropRadius(props[attribute]);
-          if (radius!='None'){
-            layer.setRadius(radius);
-          }
-          // ATTEMPTING TO CHANGE THE SYMBOLS WHEN RADIUS IS EMPTY
-          else{
-            var layer = L.marker(latlng).addTo(map);
-          }
+          layer.setRadius(radius);
 
-          //add city to popup content string
-          var popupContent = "<p><b>Country:</b> " + props["Country Name"] + "</p>";
+          //Example 1.3 line 6...in UpdatePropSymbols()
+          var popupContent = new PopupContent(props, attribute);
 
-          //add formatted attribute to panel content string
-          var year = attribute.split("_")[1];
-          popupContent += "<p><b>Number of Tourists in " + year + ":</b> " + props[attribute] ;
-
-          //update popup content
+          //update popup with new content
           popup = layer.getPopup();
-          popup.setContent(popupContent).update();
+          popup.setContent(popupContent.formatted).update();
         };
     });
 };
@@ -188,8 +177,8 @@ function createSequenceControls(attributes){
     document.querySelector(".range-slider").min = 0;
     document.querySelector(".range-slider").value = 0;
     document.querySelector(".range-slider").step = 1;
-    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="reverse">Reverse</button>');
-    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="forward">Forward</button>');
+    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="reverse"></button>');
+    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="forward"></button>');
     document.querySelector('#reverse').insertAdjacentHTML('beforeend',"<img src='img/nounrewind.png'>")
     document.querySelector('#forward').insertAdjacentHTML('beforeend',"<img src='img/nounforward.png'>")
 
