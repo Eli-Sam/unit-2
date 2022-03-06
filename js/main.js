@@ -1,14 +1,15 @@
 //declare map variable globally so all functions have access
 var map;
 var minValue;
+var dataStats = {};
 
 //step 1 create map
 function createMap(){
 
     //create the map
     map = L.map('map', {
-        center: [0, 0],
-        zoom: 2
+        center: [20, -67],
+        zoom: 4
     });
 
     //add OSM base tilelayer
@@ -48,9 +49,9 @@ function calculateMinValue(data){
 //calculate the radius of each proportional symbol
 function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
-    var minRadius = 20;
+    var minRadius = 5;
     //Flannery Apperance Compensation formula
-    var radius = 0.01 * Math.pow(attValue/minValue,0.5715) * minRadius
+    var radius = 0.40 * Math.pow(attValue/minValue,0.5715) * minRadius
     return radius;
 };
 
@@ -67,6 +68,8 @@ function getData(map){
                minValue = calculateMinValue(json);
                createPropSymbols(json, attributes);
                createSequenceControls(attributes);
+               createLegend(attributes);
+               calcStats(json);
            })
    };
 
@@ -95,7 +98,7 @@ function PopupContent(properties, attribute){
     this.attribute = attribute;
     this.year = attribute.split("_")[1];
     this.population = this.properties[attribute];
-    this.formatted = "<p><b>Country:</b> " + this.properties["Country Name"] + "</p><p><b>Number of Tourists in  " + this.year + ":</b> " + this.population;
+    this.formatted = "<p><b>Country:</b> " + this.properties["Country Name"] + "</p><p><b>Number of Tourists arrivals in  " + this.year + ":</b> " + this.population;
 };
 
 
@@ -172,16 +175,39 @@ function createSequenceControls(attributes){
     var slider = "<input class='range-slider' type='range'></input>";
     document.querySelector("#panel").insertAdjacentHTML('beforeend',slider);
 
-  //set slider attributes
-    document.querySelector(".range-slider").max = 20;
-    document.querySelector(".range-slider").min = 0;
-    document.querySelector(".range-slider").value = 0;
-    document.querySelector(".range-slider").step = 1;
-    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="reverse"></button>');
-    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="forward"></button>');
-    document.querySelector('#reverse').insertAdjacentHTML('beforeend',"<img src='img/nounrewind.png'>")
-    document.querySelector('#forward').insertAdjacentHTML('beforeend',"<img src='img/nounforward.png'>")
 
+
+    //Step 5: input listener for slider
+    document.querySelector('.range-slider').addEventListener('input', function(){
+      var index = this.value;
+      updatePropSymbols(attributes[index])
+      console.log(index)
+    });
+};
+
+//Create new sequence controls
+function createSequenceControls(attributes){
+    var SequenceControl = L.Control.extend({
+        options: {
+            position: 'bottomleft'
+        },
+
+        onAdd: function () {
+            // create the control container div with a particular class name
+            var container = L.DomUtil.create('div', 'sequence-control-container');
+
+            // ... initialize other DOM elements
+            container.insertAdjacentHTML('beforeend', '<input class="range-slider" type="range">')
+            container.insertAdjacentHTML('beforeend', '<button class="step" id="reverse" title="Reverse"><img src="img/nounrewind.png"></button>');
+            container.insertAdjacentHTML('beforeend', '<button class="step" id="forward" title="Forward"><img src="img/nounforward.png"></button>');
+            //disable any mouse event listeners for the container
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+
+    });
+
+    map.addControl(new SequenceControl());    // add listeners after adding control
     document.querySelectorAll('.step').forEach(function(step){
         step.addEventListener("click", function(){
           var index = document.querySelector('.range-slider').value;
@@ -202,14 +228,75 @@ function createSequenceControls(attributes){
           updatePropSymbols(attributes[index])
       })
   })
+  };
 
-    //Step 5: input listener for slider
-    document.querySelector('.range-slider').addEventListener('input', function(){
-      var index = this.value;
-      updatePropSymbols(attributes[index])
-      console.log(index)
-    });
-};
 
+  function calcStats(data){
+      //create empty array to store all data values
+      var allValues = [];
+      //loop through each city
+      for(var country of data.features){
+          //loop through each year
+          for(var year = 2000; year <= 2020; year+=1){
+                //get population for current year
+                var value = country.properties["Tour_"+ String(year)];
+                //add value to array
+                if (value){
+                  allValues.push(value);
+              }
+          }
+      }
+      //get min, max, mean stats for our array
+      dataStats.min = Math.min(...allValues);
+      dataStats.max = Math.max(...allValues);
+      //calculate meanValue
+      var sum = allValues.reduce(function(a, b){return a+b;});
+      dataStats.mean = sum/ allValues.length;
+
+  }
+
+function createLegend(attributes){
+      var LegendControl = L.Control.extend({
+          options: {
+              position: 'bottomright'
+          },
+
+          onAdd: function () {
+              // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'legend-control-container');
+
+           container.innerHTML = '<p class="temporalLegend">Tourist Arrivals in <span class="year">2000</span></p>';
+
+           //Step 1: start attribute legend svg string
+           var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+
+        //array of circle names to base loop on
+        var circles = ["max", "mean", "min"];
+
+        //Step 2: loop to add each circle and text to svg string
+        for (var i=0; i<circles.length; i++){
+
+        //Step 3: assign the r and cy attributes
+        var radius = calcPropRadius(dataStats[circles[i]]);
+        var cy = 130 - radius;
+
+            //circle string
+            svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';
+        };
+
+        //close svg string
+        svg += "</svg>"; ;
+
+          //add attribute legend svg to container
+          container.insertAdjacentHTML('beforeend',svg);
+
+           //add attribute legend svg to container
+           container.innerHTML += svg;
+              return container;
+          }
+      });
+
+      map.addControl(new LegendControl());
+  };
 
 document.addEventListener('DOMContentLoaded',createMap)

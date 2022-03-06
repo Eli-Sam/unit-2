@@ -1,4 +1,19 @@
 /*Add CSS styles here*/
+#title{
+  line-height: 20px;
+  font-size: 40px;
+  text-align: center;
+}
+#Mapinfo{
+  line-height: 20px;
+  font-size: 20px;
+  font-weight: normal;
+}
+#instruct{
+  line-height: 20px;
+  font-size: 15px;
+  font-weight: normal;
+}
 #map { height: 300px; }
 
 .leaflet-popup-content p {
@@ -13,22 +28,42 @@
     text-align: center;
     line-height: 42px;
 }
+.sequence-control-container {
+    width: 350px;
+    height: 30px;
+    background-color: rgba(255,255,255,0.8);
+    padding: 10px;
+    line-height: 45px;
+    text-align: center;
+    border: solid gray 1px;
+}
+
 .range-slider {
-    width: 55%;
-  }
+    width: 250px;
+}
 
 .step {
-    width: 20%;
+    width: 40px;
 }
 
 .step img {
     width: 100%;
+    height: auto;
 }
 #forward {
   float: right;
 }
 #reverse {
     float: left;
+}
+.legend-control-container {
+    width: 350px;
+    height: 30px;
+    background-color: rgba(255,255,255,0.8);
+    padding: 10px;
+    line-height: 45px;
+    text-align: center;
+    border: solid gray 1px;
 }
 
 layer.bindPopup(popupContent, {
