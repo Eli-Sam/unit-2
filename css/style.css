@@ -57,12 +57,10 @@
     float: left;
 }
 .legend-control-container {
-    width: 350px;
-    height: 30px;
     background-color: rgba(255,255,255,0.8);
-    padding: 10px;
-    line-height: 45px;
     text-align: center;
+    font-weight: bold;
+    height: 200px;
     border: solid gray 1px;
 }
 
