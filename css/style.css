@@ -1,4 +1,7 @@
-/*Add CSS styles here*/
+/*CSS Styles for all parts of the html*/
+body {
+  background-color: lightblue;
+}
 #title{
   line-height: 20px;
   font-size: 40px;
@@ -11,7 +14,7 @@
 }
 #instruct{
   line-height: 20px;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: normal;
 }
 #map { height: 300px; }

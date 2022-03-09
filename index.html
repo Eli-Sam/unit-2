@@ -9,12 +9,6 @@
         <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="lib/leaflet/leaflet.css">
 
-        <!--[if IE<9]>
-            <link rel="stylesheet" href="css/style.ie.css">
-        <![endif]-->
-
-         <!--you can also place internal styles here;
-             place these within <style> tags-->
 
     </head>
 
@@ -22,15 +16,15 @@
         <!--put your initial page content here-->
         <h1 id="title"> Tourists of the Caribbean Map </h1>
         <h4 id="Mapinfo">This is a map showing the "International tourism, number of arrivals" by year, and I decided to map the numbers for the Caribbean.
-          The data comes from The World Bank Group: https://data.worldbank.org/indicator/ST.INT.ARVL?end=2019&start=2007&view=chart. The data is from 2000 to 2020.
+          The data comes from The World Bank Group(See the readme in the data folder). The data is from 2000 to 2020. Explore the tourist arrivals to the Caribbean!
         </h4>
+
+        <div id="map"></div>
+        <div id="panel"></div>
         <h5 id="instruct">Instructions: To use the map you may step through with the slider looking year by year. You can use either the stepper buttons or drag the slider.
           Clicking on the countires will allow you to view the arrivals by that country.
         </h5>
-        <div id="map"></div>
-        <div id="panel"></div>
-        <!--you can also use this space for internal scripts;
-        place these within <script> tags-->
+
         <!--put your external script links here-->
         <script type="text/javascript" src="lib/leaflet/leaflet-src.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
